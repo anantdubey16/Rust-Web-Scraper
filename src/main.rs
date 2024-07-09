@@ -20,7 +20,7 @@ async fn main() {
     let tasks: Vec<_> = urls.into_iter().map(|url| {
         task::spawn(async move {
             match fetch_url(&url).await {
-                Ok(body) => parse_html(&body),
+                Ok(body) => parse_html(&url, &body),
                 Err(e) => eprintln!("Error fetching {}: {}", url, e),
             }
         })
