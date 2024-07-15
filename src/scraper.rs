@@ -1,5 +1,3 @@
-// src/scraper.rs
-
 use reqwest::Error;
 use select::document::Document;
 use select::predicate::{Name, Attr};
@@ -10,23 +8,23 @@ pub async fn fetch_url(url: &str) -> Result<String, Error> {
     Ok(body)
 }
 
-pub fn parse_html(url: &str, body: &str) {
+pub fn parse_html(url: &str, body: &str) -> (String, String, Vec<String>, Vec<String>) {
+    let _ = url;
     let document = Document::from(body);
     let title = document.find(Name("title")).next().map(|n| n.text()).unwrap_or_default();
-    println!("URL: {}", url);
-    println!("Title: {}", title);
 
     let meta_description = document.find(Attr("name", "description")).next()
-        .and_then(|n| n.attr("content")).unwrap_or_default();
-    println!("Meta Description: {}", meta_description);
+        .and_then(|n| n.attr("content")).unwrap_or_default().to_string();
 
-    println!("Headings:");
+    let mut headings = Vec::new();
     for heading in document.find(Name("h1")).chain(document.find(Name("h2"))).chain(document.find(Name("h3"))) {
-        println!("  - {}", heading.text());
+        headings.push(heading.text());
     }
 
-    println!("Links:");
+    let mut links = Vec::new();
     for link in document.find(Name("a")).filter_map(|n| n.attr("href")) {
-        println!("  - {}", link);
+        links.push(link.to_string());
     }
+
+    (title, meta_description, headings, links)
 }
